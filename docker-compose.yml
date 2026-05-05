@@ -1,0 +1,32 @@
+version: "3.8"
+
+services:
+
+  backend:
+    build: ./backend
+    container_name: ims_backend
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+      - redis
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/ims_db
+      REDIS_URL: redis://redis:6379
+
+  postgres:
+    image: postgres:15
+    container_name: ims_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ims_db
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7
+    container_name: ims_redis
+    ports:
+      - "6379:6379"

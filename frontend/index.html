@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>IMS Dashboard</title>
+</head>
+<body>
+
+<h1>Incident Dashboard</h1>
+
+<button onclick="loadIncidents()">Refresh Incidents</button>
+
+<ul id="incidentList"></ul>
+
+<hr>
+
+<h2>Incident Details</h2>
+<div id="details"></div>
+
+<hr>
+
+<h2>Add RCA</h2>
+<input id="incidentId" placeholder="Incident ID"><br><br>
+<input id="rootCause" placeholder="Root Cause"><br><br>
+<input id="fix" placeholder="Fix"><br><br>
+<button onclick="addRCA()">Submit RCA</button>
+
+<hr>
+
+<h2>Close Incident</h2>
+<input id="closeId" placeholder="Incident ID"><br><br>
+<button onclick="closeIncident()">Close</button>
+
+<script>
+const BASE_URL = "http://127.0.0.1:8000";
+
+async function loadIncidents() {
+    const res = await fetch(`${BASE_URL}/incidents`);
+    const data = await res.json();
+
+    const list = document.getElementById("incidentList");
+    list.innerHTML = "";
+
+    data.forEach(i => {
+        const li = document.createElement("li");
+        li.innerHTML = `
+            ID: ${i.id} | ${i.component_id} | ${i.status}
+            <button onclick="viewIncident(${i.id})">View</button>
+        `;
+        list.appendChild(li);
+    });
+}
+
+async function viewIncident(id) {
+    const res = await fetch(`${BASE_URL}/incidents`);
+    const data = await res.json();
+    const incident = data.find(i => i.id === id);
+
+    document.getElementById("details").innerHTML = `
+        <p>ID: ${incident.id}</p>
+        <p>Component: ${incident.component_id}</p>
+        <p>Status: ${incident.status}</p>
+    `;
+}
+
+async function addRCA() {
+    const id = document.getElementById("incidentId").value;
+    const root = document.getElementById("rootCause").value;
+    const fix = document.getElementById("fix").value;
+
+    await fetch(`${BASE_URL}/incident/${id}/rca`, {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+            root_cause: root,
+            fix: fix
+        })
+    });
+
+    alert("RCA added");
+}
+
+async function closeIncident() {
+    const id = document.getElementById("closeId").value;
+
+    const res = await fetch(`${BASE_URL}/incident/${id}/status?status=CLOSED`, {
+        method: "PUT"
+    });
+
+    const data = await res.json();
+    alert(JSON.stringify(data));
+}
+</script>
+
+</body>
+</html>
