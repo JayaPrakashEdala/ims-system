@@ -1,0 +1,4 @@
+[
+  { "component_id": "RDBMS_PRIMARY", "severity": "LOW" },
+  { "component_id": "CACHE_CLUSTER_01", "severity": "LOW" }
+]
